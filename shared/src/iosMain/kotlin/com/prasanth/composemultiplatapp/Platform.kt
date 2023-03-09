@@ -11,4 +11,5 @@ actual fun getPlatform(): Platform = IOSPlatform()
 
 fun composeApplication() = Application {
     MainScreen()
+
 }
