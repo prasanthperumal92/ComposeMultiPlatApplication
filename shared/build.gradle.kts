@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
-    id("org.jetbrains.compose") version "1.3.0"
+    id("org.jetbrains.compose") version "1.4.0-alpha01-dev954"
 }
 
 kotlin {
@@ -14,8 +14,19 @@ kotlin {
         }
     }
     ios()
-    iosX64()
-    iosArm64()
+    iosX64("uikitX64") {
+        binaries {
+            executable() {
+                entryPoint = "main"
+                freeCompilerArgs += listOf(
+                    "-linker-option", "-framework", "-linker-option", "Metal",
+                    "-linker-option", "-framework", "-linker-option", "CoreText",
+                    "-linker-option", "-framework", "-linker-option", "CoreGraphics"
+                )
+            }
+        }
+    }
+
     iosSimulatorArm64()
 
 
@@ -39,6 +50,8 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.runtime)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.components.resources)
             }
         }
         val commonTest by getting {
@@ -52,30 +65,14 @@ kotlin {
         val iosMain by getting {
             dependsOn(commonMain)
         }
-        val iosX64Main by getting{
+        val uikitX64Main by getting{
             dependsOn(iosMain)
         }
-        val iosArm64Main by getting{
-            dependsOn(iosMain)
-        }
+        
         val iosSimulatorArm64Main by getting{
             dependsOn(iosMain)
         }
 
-
-        val iosTest by getting {
-            dependsOn(commonTest)
-        }
-        val iosX64Test by getting{
-            dependsOn(iosTest)
-        }
-        val iosArm64Test by getting{
-            dependsOn(iosTest)
-
-        }
-        val iosSimulatorArm64Test by getting{
-            dependsOn(iosTest)
-        }
     }
 }
 
@@ -85,5 +82,22 @@ android {
     defaultConfig {
         minSdk = 24
         targetSdk = 33
+    }
+}
+
+compose.experimental {
+    uikit.application {
+        bundleIdPrefix = "prasanth.iosApp.compose"
+        projectName = "ComposeMultiPlatApp"
+        deployConfigurations {
+            simulator("IPhone13Pro") {
+                //Usage: ./gradlew iosDeployIPhone8Debug
+                device = org.jetbrains.compose.experimental.dsl.IOSDevices.IPHONE_13_PRO
+            }
+            connectedDevice("Device") {
+                //Usage: ./gradlew iosDeployDeviceRelease
+                this.teamId="prasanthperumal92@gmail.com"
+            }
+        }
     }
 }
