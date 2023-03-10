@@ -3,7 +3,6 @@ import com.prasanth.composemultiplatapp.MainScreen
 import kotlinx.cinterop.*
 import platform.Foundation.NSStringFromClass
 import platform.UIKit.*
-import androidx.compose.ui.window.ComposeUIViewController
 
 public fun main() {
     val args = emptyArray<String>()
@@ -29,7 +28,7 @@ class MainAppDelegate @ObjCObjectBase.OverrideInit constructor() : UIResponder()
         didFinishLaunchingWithOptions: Map<Any?, *>?
     ): Boolean {
         window = UIWindow(frame = UIScreen.mainScreen.bounds)
-        window?.rootViewController = ComposeUIViewController {
+        window?.rootViewController = Application {
             MainScreen()
         }
         window?.makeKeyAndVisible()

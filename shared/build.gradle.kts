@@ -1,8 +1,7 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("native.cocoapods")
     id("com.android.library")
-    id("org.jetbrains.compose") version "1.4.0-alpha01-dev954"
+    id("org.jetbrains.compose") version "1.3.0"
 }
 
 kotlin {
@@ -26,22 +25,20 @@ kotlin {
             }
         }
     }
-
-    iosSimulatorArm64()
-
-
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "shared"
-            isStatic = true
+    iosArm64("uikitArm64") {
+        binaries {
+            executable() {
+                entryPoint = "main"
+                freeCompilerArgs += listOf(
+                    "-linker-option", "-framework", "-linker-option", "Metal",
+                    "-linker-option", "-framework", "-linker-option", "CoreText",
+                    "-linker-option", "-framework", "-linker-option", "CoreGraphics"
+                )
+            }
         }
     }
-    
+    iosSimulatorArm64()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -50,25 +47,19 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.runtime)
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.components.resources)
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
-        val androidMain by getting
-        val androidUnitTest by getting
 
+        val androidMain by getting
         val iosMain by getting {
             dependsOn(commonMain)
         }
         val uikitX64Main by getting{
             dependsOn(iosMain)
         }
-        
+        val uikitArm64Main by getting{
+            dependsOn(iosMain)
+        }
         val iosSimulatorArm64Main by getting{
             dependsOn(iosMain)
         }
@@ -91,13 +82,15 @@ compose.experimental {
         projectName = "ComposeMultiPlatApp"
         deployConfigurations {
             simulator("IPhone13Pro") {
-                //Usage: ./gradlew iosDeployIPhone8Debug
+                //Usage: ./gradlew iosDeployIPhone13ProDebug
                 device = org.jetbrains.compose.experimental.dsl.IOSDevices.IPHONE_13_PRO
             }
             connectedDevice("Device") {
                 //Usage: ./gradlew iosDeployDeviceRelease
-                this.teamId="prasanthperumal92@gmail.com"
+                this.teamId="..."
             }
         }
     }
 }
+
+
